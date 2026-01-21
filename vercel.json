@@ -1,19 +1,13 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "api/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "runtime": "python3.12",
-        "buildCommand": "pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt"
-      }
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build"
     },
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "src": "api/main.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -22,12 +16,8 @@
       "dest": "api/main.py"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "frontend/assets/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "frontend/index.html"
+      "dest": "frontend/$1"
     }
   ]
 }
