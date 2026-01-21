@@ -11,7 +11,9 @@ conjugator = Conjugator()  # this class handles all the conjugation logic
 
 
 @router.get("/verbs/random", response_model=VerbConjugations)
-async def get_random_verb_conjugation(request: Request) -> VerbConjugations:
+async def get_random_verb_conjugation(
+    request: Request, include_vosotros: bool = True
+) -> VerbConjugations:
     """
     Retrieve conjugations for a random Spanish verb.
     """
@@ -25,14 +27,18 @@ async def get_random_verb_conjugation(request: Request) -> VerbConjugations:
     if not all_conjugations:
         raise HTTPException(
             status_code=404,
-            detail=f"Conjugations not found for randomly selected verb: {random_verb_name}. "
-            "This might indicate an issue with the conjugation library or verb list.",
+            detail=f"Conjugations not found for randomly selected verb: {random_verb_name}."
+            + "This might indicate an issue with the conjugation library or verb list.",
         )
 
-    tenses = {
-        tense: TenseConjugations(forms=ConjugationForm(**forms))
-        for tense, forms in all_conjugations.items()
-    }
+    tenses = {}
+    for tense, forms in all_conjugations.items():
+        if not include_vosotros:
+            forms_copy = forms.copy()
+            _ = forms_copy.pop("vosotros/vosotras", None)  # Remove vosotros if present
+            tenses[tense] = TenseConjugations(forms=ConjugationForm(**forms_copy))
+        else:
+            tenses[tense] = TenseConjugations(forms=ConjugationForm(**forms))
 
     return VerbConjugations(verb=random_verb_name, tenses=tenses)
 

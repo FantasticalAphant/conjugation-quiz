@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ConjugationForm, VerbConjugations } from "../types";
 
 export const Route = createFileRoute("/")({
     component: Index,
 });
 
-const fetchRandomVerb = async (): Promise<VerbConjugations> => {
-    const res = await fetch(`/api/v1/verbs/random`);
+const fetchRandomVerb = async (
+    includeVosotros: boolean,
+): Promise<VerbConjugations> => {
+    const url = `/api/v1/verbs/random?include_vosotros=${includeVosotros}`;
+    const res = await fetch(url);
     if (!res.ok) {
         throw new Error("Network response was not ok");
     }
@@ -20,13 +23,42 @@ function Index() {
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [quizId, setQuizId] = useState(0);
 
+    const [includeVosotros, setIncludeVosotros] = useState(() => {
+        const stored = localStorage.getItem("includeVosotros");
+        return stored ? JSON.parse(stored) : true;
+    });
+
+    // We need to re-read localStorage when the component mounts or gets focus
+    // to ensure the setting is up-to-date if changed on the settings page.
+    // However, directly calling localStorage in render or in a useEffect without
+    // a specific event listener can be tricky with how Tanstack Query works
+    // with query keys. A simpler approach for this specific case,
+    // given the current structure, is to force a re-fetch/re-evaluation
+    // when we suspect the setting might have changed.
+    // For now, let's just make sure it's part of the queryKey
+    // to trigger a refetch if it changes (though its change detection
+    // needs to be external or state-driven).
+    // A more robust solution might involve a global state management for settings.
+    // For now, we'll rely on the quizId to trigger refetch and on initial load.
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const stored = localStorage.getItem("includeVosotros");
+            setIncludeVosotros(stored ? JSON.parse(stored) : true);
+        };
+        window.addEventListener("storage", handleStorageChange);
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, []);
+
     const {
         data: verbData,
         isLoading,
         isError,
     } = useQuery({
-        queryKey: ["randomVerb", quizId], // quizId will force a refetch when it changes
-        queryFn: fetchRandomVerb,
+        queryKey: ["randomVerb", quizId, includeVosotros], // quizId and includeVosotros will force a refetch when they change
+        queryFn: () => fetchRandomVerb(includeVosotros),
     });
 
     const quiz = useMemo(() => {
@@ -54,7 +86,7 @@ function Index() {
             pronoun: randomPronoun,
             correctAnswer,
         };
-    }, [verbData, quizId]); // quizId also forces re-calculation of random tense/pronoun
+    }, [verbData, quizId, includeVosotros]); // quizId and includeVosotros also forces re-calculation of random tense/pronoun
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
