@@ -7,8 +7,8 @@ export const Route = createFileRoute("/")({
     component: Index,
 });
 
-const fetchVerb = async (verb: string): Promise<VerbConjugations> => {
-    const res = await fetch(`/api/v1/verbs/${verb}`);
+const fetchRandomVerb = async (): Promise<VerbConjugations> => {
+    const res = await fetch(`/api/v1/verbs/random`);
     if (!res.ok) {
         throw new Error("Network response was not ok");
     }
@@ -19,15 +19,14 @@ function Index() {
     const [answer, setAnswer] = useState("");
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [quizId, setQuizId] = useState(0);
-    const verbToQuiz = "hablar";
 
     const {
         data: verbData,
         isLoading,
         isError,
     } = useQuery({
-        queryKey: ["verb", verbToQuiz],
-        queryFn: () => fetchVerb(verbToQuiz),
+        queryKey: ["randomVerb", quizId], // quizId will force a refetch when it changes
+        queryFn: fetchRandomVerb,
     });
 
     const quiz = useMemo(() => {
@@ -55,7 +54,7 @@ function Index() {
             pronoun: randomPronoun,
             correctAnswer,
         };
-    }, [verbData, quizId]);
+    }, [verbData, quizId]); // quizId also forces re-calculation of random tense/pronoun
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,7 +70,7 @@ function Index() {
     const handleNext = () => {
         setIsCorrect(null);
         setAnswer("");
-        setQuizId((prevId) => prevId + 1);
+        setQuizId((prevId) => prevId + 1); // Increment quizId to trigger new random verb fetch and quiz generation
     };
 
     if (isLoading) {
@@ -112,7 +111,7 @@ function Index() {
                     type="text"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    className="grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     disabled={isCorrect !== null}
                     placeholder="Your answer"
                 />
