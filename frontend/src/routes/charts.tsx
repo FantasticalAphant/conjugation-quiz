@@ -89,14 +89,14 @@ function TabButton({
 }) {
     return (
         <button
-            className={`px-4 py-2 font-semibold rounded-t-lg ${
-                isActive
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
-            }`}
+            className={`relative px-4 py-2 font-semibold rounded-t-lg focus:outline-none 
+                ${isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             onClick={onClick}
         >
             {children}
+            {isActive && (
+                <div className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
+            )}
         </button>
     );
 }
@@ -142,20 +142,22 @@ function Charts() {
             </div>
 
             <div className="mb-6 flex justify-center gap-2 flex-wrap">
-                {tenses.map((tense) => (
-                    <button
-                        key={tense}
-                        className={`px-3 py-1 text-sm rounded-full ${
-                            selectedTense === tense
-                                ? "bg-indigo-500 text-white"
-                                : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
-                        }`}
-                        onClick={() => setSelectedTense(tense)}
-                    >
-                        {tense}
-                    </button>
-                ))}
-            </div>
+                                                          {tenses.map((tense) => (
+                                                              <button
+                                                                  key={tense}
+                                                                  className={`relative px-3 py-1 text-sm rounded-full focus:outline-none 
+                                                                      ${selectedTense === tense
+                                                                          ? "text-indigo-600 dark:text-indigo-400"
+                                                                          : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                                                      }`}
+                                                                  onClick={() => setSelectedTense(tense)}
+                                                              >
+                                                                  {tense}
+                                                                  {selectedTense === tense && (
+                                                                      <div className="absolute -bottom-1 left-1/4 right-1/4 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
+                                                                  )}
+                                                              </button>
+                                                          ))}            </div>
 
             {selectedTenseData && (
                 <div className="flex flex-col md:flex-row gap-6 mb-8">
