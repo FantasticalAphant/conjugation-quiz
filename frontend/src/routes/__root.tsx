@@ -1,4 +1,5 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { Analytics } from '@vercel/analytics/react'
 
 export const Route = createRootRoute({
   component: () => (
@@ -13,6 +14,7 @@ export const Route = createRootRoute({
       </div>
       <hr />
       <Outlet />
+      <Analytics />
     </>
   ),
 })
