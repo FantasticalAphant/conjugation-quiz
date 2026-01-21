@@ -89,13 +89,13 @@ function TabButton({
 }) {
     return (
         <button
-            className={`relative px-4 py-2 font-semibold rounded-t-lg focus:outline-none 
-                ${isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
+            className={`relative px-4 py-2 font-semibold focus:outline-none transition-colors cursor-pointer
+                ${isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             onClick={onClick}
         >
             {children}
             {isActive && (
-                <div className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 dark:bg-indigo-400" />
             )}
         </button>
     );
@@ -124,78 +124,82 @@ function Charts() {
     ].find((t) => t.tense === selectedTense);
 
     return (
-        <div className="p-4 text-gray-900 dark:text-white">
-            <h1 className="text-3xl font-bold mb-6 text-center">
-                Regular Conjugation Charts
-            </h1>
+        <div className="p-4 md:p-6">
+            <div className="max-w-7xl mx-auto">
+                <h1 className="text-2xl font-bold mb-6">Conjugation Charts</h1>
 
-            <div className="mb-4 flex justify-center gap-2">
-                {moods.map((mood) => (
-                    <TabButton
-                        key={mood}
-                        isActive={selectedMood === mood}
-                        onClick={() => handleMoodChange(mood)}
-                    >
-                        {mood.charAt(0).toUpperCase() + mood.slice(1)}
-                    </TabButton>
-                ))}
-            </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <div className="border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-center -mb-px">
+                            {moods.map((mood) => (
+                                <TabButton
+                                    key={mood}
+                                    isActive={selectedMood === mood}
+                                    onClick={() => handleMoodChange(mood)}
+                                >
+                                    {mood.charAt(0).toUpperCase() + mood.slice(1)}
+                                </TabButton>
+                            ))}
+                        </div>
+                    </div>
 
-            <div className="mb-6 flex justify-center gap-2 flex-wrap">
-                                                          {tenses.map((tense) => (
-                                                              <button
-                                                                  key={tense}
-                                                                  className={`relative px-3 py-1 text-sm rounded-full focus:outline-none 
-                                                                      ${selectedTense === tense
-                                                                          ? "text-indigo-600 dark:text-indigo-400"
-                                                                          : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                                                      }`}
-                                                                  onClick={() => setSelectedTense(tense)}
-                                                              >
-                                                                  {tense}
-                                                                  {selectedTense === tense && (
-                                                                      <div className="absolute -bottom-1 left-1/4 right-1/4 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
-                                                                  )}
-                                                              </button>
-                                                          ))}            </div>
+                    <div className="p-4 sm:p-6">
+                        <div className="mb-6 flex justify-center gap-2 flex-wrap">
+                            {tenses.map((tense) => (
+                                <button
+                                    key={tense}
+                                    className={`px-3 py-1 text-sm font-semibold rounded-full focus:outline-none transition-colors cursor-pointer ${
+                                        selectedTense === tense
+                                            ? "bg-indigo-600 text-white shadow"
+                                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                    }`}
+                                    onClick={() => setSelectedTense(tense)}
+                                >
+                                    {tense}
+                                </button>
+                            ))}
+                        </div>
 
-            {selectedTenseData && (
-                <div className="flex flex-col md:flex-row gap-6 mb-8">
-                    <ConjugationTable
-                        verbType="ar"
-                        exampleVerb="trabajar"
-                        tense={selectedTenseData.tense}
-                        endings={selectedTenseData.endings.ar}
-                        personLabels={personLabels}
-                    />
-                    <ConjugationTable
-                        verbType="er"
-                        exampleVerb="aprender"
-                        tense={selectedTenseData.tense}
-                        endings={selectedTenseData.endings.er}
-                        personLabels={personLabels}
-                    />
-                    <ConjugationTable
-                        verbType="ir"
-                        exampleVerb="escribir"
-                        tense={selectedTenseData.tense}
-                        endings={selectedTenseData.endings.ir}
-                        personLabels={personLabels}
-                    />
+                        {selectedTenseData && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                                <ConjugationTable
+                                    verbType="ar"
+                                    exampleVerb="trabajar"
+                                    tense={selectedTenseData.tense}
+                                    endings={selectedTenseData.endings.ar}
+                                    personLabels={personLabels}
+                                />
+                                <ConjugationTable
+                                    verbType="er"
+                                    exampleVerb="aprender"
+                                    tense={selectedTenseData.tense}
+                                    endings={selectedTenseData.endings.er}
+                                    personLabels={personLabels}
+                                />
+                                <ConjugationTable
+                                    verbType="ir"
+                                    exampleVerb="escribir"
+                                    tense={selectedTenseData.tense}
+                                    endings={selectedTenseData.endings.ir}
+                                    personLabels={personLabels}
+                                />
+                            </div>
+                        )}
+
+                        <div className="max-w-4xl mx-auto p-4 bg-gray-100 dark:bg-gray-900 rounded-lg">
+                            <h3 className="text-lg font-bold mb-2 text-center">Pronoun Legend</h3>
+                            <ul className="text-center space-y-1 text-sm">
+                                {pronouns.map((p, i) => (
+                                    <li key={i}>
+                                        <span className="font-bold">{personLabels[i]} Person:</span>{" "}
+                                        <span className="font-mono">{p.singular}</span> (singular),{" "}
+                                        <span className="font-mono">{p.plural}</span> (plural)
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            )}
-
-            <div className="max-w-4xl mx-auto mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <h3 className="text-lg font-bold mb-2 text-center">Pronoun Legend</h3>
-                <ul className="text-center space-y-1">
-                    {pronouns.map((p, i) => (
-                        <li key={i}>
-                            <span className="font-bold">{personLabels[i]} Person:</span>{" "}
-                            <span className="font-mono">{p.singular}</span> (singular),{" "}
-                            <span className="font-mono">{p.plural}</span> (plural)
-                        </li>
-                    ))}
-                </ul>
             </div>
         </div>
     );
