@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/main.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["api/verbs.json", "my_personal_spanish_conjugation_generator/data/verbs.json"]
+      }
     },
     {
       "src": "frontend/package.json",
@@ -19,11 +22,12 @@
       "dest": "api/main.py"
     },
     {
-      "handle": "filesystem"
+      "src": "/assets/(.*)",
+      "dest": "/frontend/assets/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "index.html"
+      "dest": "/frontend/index.html"
     }
   ]
 }
