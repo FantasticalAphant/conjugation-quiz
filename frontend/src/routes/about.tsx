@@ -1,27 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/about')({
-  component: About,
-})
+export const Route = createFileRoute("/about")({
+    component: About,
+});
 
 function About() {
-  const { isPending, error, data } = useQuery({
-    queryKey: ['aboutData'],
-    queryFn: () =>
-      fetch('/api/about').then((res) =>
-        res.json(),
-      ),
-  })
+    const { isPending, error, data } = useQuery({
+        queryKey: ["aboutData"],
+        queryFn: () => fetch("/api/about").then((res) => res.json()),
+    });
 
-  if (isPending) return 'Loading...'
+    if (isPending) return "Loading...";
 
-  if (error) return 'An error has occurred: ' + error.message
+    if (error) return "An error has occurred: " + error.message;
 
-  return (
-    <div className="p-2">
-      <h3>About Page</h3>
-      <p>{data.message}</p>
-    </div>
-  )
+    return (
+        <div className="p-2">
+            <h3>About Page</h3>
+            <p>{data.message}</p>
+        </div>
+    );
 }
