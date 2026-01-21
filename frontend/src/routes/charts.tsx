@@ -25,9 +25,19 @@ function ConjugationTable({
             return "-";
         }
         if (tense === "Future" || tense === "Conditional") {
-            return exampleVerb + ending;
+            return (
+                <>
+                    {exampleVerb}
+                    <span className="text-red-500">{ending}</span>
+                </>
+            );
         }
-        return stem + ending;
+        return (
+            <>
+                {stem}
+                <span className="text-red-500">{ending}</span>
+            </>
+        );
     };
     return (
         <div className="w-full">
