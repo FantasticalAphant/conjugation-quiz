@@ -1,12 +1,11 @@
 [project]
 name = "conjugation-quiz"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 requires-python = ">=3.12"
+
 dependencies = [
     "fastapi[standard]",
+    "pydantic>=2.0.0",
+    "uvicorn",
     "my-personal-spanish-conjugation-generator>=0.1.1",
-    "gunicorn",
 ]
-

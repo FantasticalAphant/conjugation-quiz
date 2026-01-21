@@ -1,0 +1,5 @@
+fastapi
+# Pinning pydantic to a specific version to ensure a stable build
+pydantic==2.8.2
+uvicorn
+my-personal-spanish-conjugation-generator>=0.1.1
