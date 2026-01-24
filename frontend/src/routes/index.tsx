@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import QuizCounter from "../components/QuizCounter";
 import { useSettings } from "../contexts/SettingsContext";
 import type { ConjugationForm, VerbConjugations } from "../types";
 
@@ -29,6 +30,8 @@ function Index() {
     const [answer, setAnswer] = useState("");
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [quizId, setQuizId] = useState(0);
+    const [questionCount, setQuestionCount] = useState(0);
+    const [correctCount, setCorrectCount] = useState(0);
 
     const { includeVosotros, selectedTenses } = useSettings();
     const answerInputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +44,7 @@ function Index() {
     } = useQuery({
         queryKey: ["randomVerb", quizId, includeVosotros, selectedTenses],
         queryFn: () => fetchRandomVerb(includeVosotros, selectedTenses),
+        refetchOnWindowFocus: false,
     });
 
     const quiz = useMemo(() => {
@@ -103,8 +107,10 @@ function Index() {
         e.preventDefault();
         if (!quiz) return;
 
+        setQuestionCount((prev) => prev + 1);
         if (answer.toLowerCase() === quiz.correctAnswer.toLowerCase()) {
             setIsCorrect(true);
+            setCorrectCount((prev) => prev + 1);
         } else {
             setIsCorrect(false);
         }
@@ -113,6 +119,11 @@ function Index() {
     const handleCharacterClick = (char: string) => {
         setAnswer((prev) => prev + char);
         answerInputRef.current?.focus();
+    };
+
+    const handleReset = () => {
+        setCorrectCount(0);
+        setQuestionCount(0);
     };
 
     const accentedChars = ["á", "é", "í", "ó", "ú", "ü", "ñ"];
@@ -162,7 +173,7 @@ function Index() {
                             type="text"
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
-                            className="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             disabled={isCorrect !== null}
                             placeholder="Your answer"
                             autoFocus
@@ -189,7 +200,7 @@ function Index() {
                         ))}
                     </div>
                 </form>
-                <div className="mt-6 text-center min-h-[72px]">
+                <div className="mt-6 text-center min-h-18">
                     {isCorrect === true && (
                         <div>
                             <p className="text-green-500 text-xl font-bold">
@@ -227,6 +238,11 @@ function Index() {
 
     return (
         <div className="p-4 md:p-6">
+            <QuizCounter
+                questionCount={questionCount}
+                correctCount={correctCount}
+                onReset={handleReset}
+            />
             <div className="max-w-xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sm:p-8">
                     <h2 className="text-2xl font-bold mb-6 text-center">
@@ -238,4 +254,3 @@ function Index() {
         </div>
     );
 }
-
