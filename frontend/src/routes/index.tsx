@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useSettings } from "../contexts/SettingsContext";
 import type { ConjugationForm, VerbConjugations } from "../types";
@@ -69,6 +69,34 @@ function Index() {
         };
     }, [verbData]);
 
+    const handleNext = useCallback(() => {
+        setIsCorrect(null);
+        setAnswer("");
+        setQuizId((prevId) => prevId + 1);
+        refetch();
+    }, [refetch]);
+
+    // Add global event listener for "Enter" to go to the next question
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Enter" && isCorrect !== null) {
+                // Check if the event target is not an input to avoid conflicts
+                if (
+                    !(event.target instanceof HTMLInputElement) &&
+                    !(event.target instanceof HTMLTextAreaElement)
+                ) {
+                    handleNext();
+                }
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isCorrect, handleNext]); // Rerun effect when isCorrect or handleNext changes
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!quiz) return;
@@ -78,13 +106,6 @@ function Index() {
         } else {
             setIsCorrect(false);
         }
-    };
-
-    const handleNext = () => {
-        setIsCorrect(null);
-        setAnswer("");
-        setQuizId((prevId) => prevId + 1);
-        refetch();
     };
 
     const MainContent = () => {
