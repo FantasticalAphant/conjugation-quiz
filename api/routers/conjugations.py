@@ -1,6 +1,7 @@
 import random
+from typing import List
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from my_personal_spanish_conjugation_generator import Conjugator
 
 from api.models import ConjugationForm, TenseConjugations, VerbConjugations
@@ -12,7 +13,9 @@ conjugator = Conjugator()  # this class handles all the conjugation logic
 
 @router.get("/verbs/random", response_model=VerbConjugations)
 async def get_random_verb_conjugation(
-    request: Request, include_vosotros: bool = True
+    request: Request,
+    include_vosotros: bool = True,
+    tenses: List[str] | None = Query(None),
 ) -> VerbConjugations:
     """
     Retrieve conjugations for a random Spanish verb.
@@ -31,16 +34,23 @@ async def get_random_verb_conjugation(
             + "This might indicate an issue with the conjugation library or verb list.",
         )
 
-    tenses = {}
+    if tenses:
+        all_conjugations = {
+            tense: forms
+            for tense, forms in all_conjugations.items()
+            if tense in tenses
+        }
+
+    tenses_data = {}
     for tense, forms in all_conjugations.items():
         if not include_vosotros:
             forms_copy = forms.copy()
             _ = forms_copy.pop("vosotros/vosotras", None)  # Remove vosotros if present
-            tenses[tense] = TenseConjugations(forms=ConjugationForm(**forms_copy))
+            tenses_data[tense] = TenseConjugations(forms=ConjugationForm(**forms_copy))
         else:
-            tenses[tense] = TenseConjugations(forms=ConjugationForm(**forms))
+            tenses_data[tense] = TenseConjugations(forms=ConjugationForm(**forms))
 
-    return VerbConjugations(verb=random_verb_name, tenses=tenses)
+    return VerbConjugations(verb=random_verb_name, tenses=tenses_data)
 
 
 @router.get("/verbs/{verb_name}/{tense}", response_model=TenseConjugations)
@@ -94,3 +104,17 @@ async def get_verb_conjugations(verb_name: str, request: Request) -> VerbConjuga
     }
 
     return VerbConjugations(verb=verb_name, tenses=tenses)
+
+
+@router.get("/tenses", response_model=list[str])
+async def get_tenses() -> list[str]:
+    """
+    Retrieve a list of all available tenses.
+    """
+    all_conjugations = conjugator.get_all_conjugations(verb="hablar")
+    if not all_conjugations:
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve tenses. The conjugation library might not be properly initialized.",
+        )
+    return list(all_conjugations.keys())

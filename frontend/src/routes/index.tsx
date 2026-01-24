@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+
+import { useSettings } from "../contexts/SettingsContext";
 import type { ConjugationForm, VerbConjugations } from "../types";
 
 export const Route = createFileRoute("/")({
@@ -9,8 +11,13 @@ export const Route = createFileRoute("/")({
 
 const fetchRandomVerb = async (
     includeVosotros: boolean,
+    tenses: string[],
 ): Promise<VerbConjugations> => {
-    const url = `/api/v1/verbs/random?include_vosotros=${includeVosotros}`;
+    const params = new URLSearchParams();
+    params.append("include_vosotros", String(includeVosotros));
+    tenses.forEach((tense) => params.append("tenses", tense));
+
+    const url = `/api/v1/verbs/random?${params.toString()}`;
     const res = await fetch(url);
     if (!res.ok) {
         throw new Error("Network response was not ok");
@@ -23,29 +30,16 @@ function Index() {
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [quizId, setQuizId] = useState(0);
 
-    const [includeVosotros, setIncludeVosotros] = useState(() => {
-        const stored = localStorage.getItem("includeVosotros");
-        return stored ? JSON.parse(stored) : true;
-    });
-
-    useEffect(() => {
-        const handleStorageChange = () => {
-            const stored = localStorage.getItem("includeVosotros");
-            setIncludeVosotros(stored ? JSON.parse(stored) : true);
-        };
-        window.addEventListener("storage", handleStorageChange);
-        return () => {
-            window.removeEventListener("storage", handleStorageChange);
-        };
-    }, []);
+    const { includeVosotros, selectedTenses } = useSettings();
 
     const {
         data: verbData,
         isLoading,
         isError,
+        refetch,
     } = useQuery({
-        queryKey: ["randomVerb", quizId, includeVosotros],
-        queryFn: () => fetchRandomVerb(includeVosotros),
+        queryKey: ["randomVerb", quizId, includeVosotros, selectedTenses],
+        queryFn: () => fetchRandomVerb(includeVosotros, selectedTenses),
     });
 
     const quiz = useMemo(() => {
@@ -73,7 +67,7 @@ function Index() {
             pronoun: randomPronoun,
             correctAnswer,
         };
-    }, [verbData, quizId, includeVosotros]);
+    }, [verbData]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -90,6 +84,7 @@ function Index() {
         setIsCorrect(null);
         setAnswer("");
         setQuizId((prevId) => prevId + 1);
+        refetch();
     };
 
     const MainContent = () => {
@@ -112,14 +107,21 @@ function Index() {
             <>
                 <div className="mb-6 space-y-3">
                     <p className="text-xl">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">Verb:</span> {quiz.verb}
+                        <span className="font-semibold text-gray-500 dark:text-gray-400">
+                            Verb:
+                        </span>{" "}
+                        {quiz.verb}
                     </p>
                     <p className="text-xl">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">Tense:</span>{" "}
+                        <span className="font-semibold text-gray-500 dark:text-gray-400">
+                            Tense:
+                        </span>{" "}
                         {quiz.tense.replaceAll("_", " ")}
                     </p>
                     <p className="text-xl">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">Pronoun:</span>{" "}
+                        <span className="font-semibold text-gray-500 dark:text-gray-400">
+                            Pronoun:
+                        </span>{" "}
                         {quiz.pronoun}
                     </p>
                 </div>
@@ -144,7 +146,9 @@ function Index() {
                 <div className="mt-6 text-center min-h-[72px]">
                     {isCorrect === true && (
                         <div>
-                            <p className="text-green-500 text-xl font-bold">Correct!</p>
+                            <p className="text-green-500 text-xl font-bold">
+                                Correct!
+                            </p>
                             <button
                                 onClick={handleNext}
                                 className="mt-2 px-5 py-2 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-800 transition-colors"
@@ -154,10 +158,13 @@ function Index() {
                         </div>
                     )}
                     {isCorrect === false && (
-                         <div>
+                        <div>
                             <p className="text-red-500 text-xl font-bold">
                                 Incorrect! The correct answer is{" "}
-                                <span className="font-mono">{quiz.correctAnswer}</span>.
+                                <span className="font-mono">
+                                    {quiz.correctAnswer}
+                                </span>
+                                .
                             </p>
                             <button
                                 onClick={handleNext}
@@ -169,8 +176,8 @@ function Index() {
                     )}
                 </div>
             </>
-        )
-    }
+        );
+    };
 
     return (
         <div className="p-4 md:p-6">
