@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useSettings } from "../contexts/SettingsContext";
 import type { ConjugationForm, VerbConjugations } from "../types";
@@ -31,6 +31,7 @@ function Index() {
     const [quizId, setQuizId] = useState(0);
 
     const { includeVosotros, selectedTenses } = useSettings();
+    const answerInputRef = useRef<HTMLInputElement>(null);
 
     const {
         data: verbData,
@@ -74,6 +75,7 @@ function Index() {
         setAnswer("");
         setQuizId((prevId) => prevId + 1);
         refetch();
+        answerInputRef.current?.focus();
     }, [refetch]);
 
     // Add global event listener for "Enter" to go to the next question
@@ -107,6 +109,13 @@ function Index() {
             setIsCorrect(false);
         }
     };
+
+    const handleCharacterClick = (char: string) => {
+        setAnswer((prev) => prev + char);
+        answerInputRef.current?.focus();
+    };
+
+    const accentedChars = ["á", "é", "í", "ó", "ú", "ü", "ñ"];
 
     const MainContent = () => {
         if (isLoading) {
@@ -146,23 +155,39 @@ function Index() {
                         {quiz.pronoun}
                     </p>
                 </div>
-                <form onSubmit={handleSubmit} className="flex gap-3">
-                    <input
-                        type="text"
-                        value={answer}
-                        onChange={(e) => setAnswer(e.target.value)}
-                        className="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        disabled={isCorrect !== null}
-                        placeholder="Your answer"
-                        autoFocus
-                    />
-                    <button
-                        type="submit"
-                        className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 disabled:bg-indigo-300 dark:disabled:bg-indigo-800 dark:disabled:text-gray-400 transition-colors"
-                        disabled={isCorrect !== null || !answer}
-                    >
-                        Check
-                    </button>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                    <div className="flex gap-3">
+                        <input
+                            ref={answerInputRef}
+                            type="text"
+                            value={answer}
+                            onChange={(e) => setAnswer(e.target.value)}
+                            className="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            disabled={isCorrect !== null}
+                            placeholder="Your answer"
+                            autoFocus
+                        />
+                        <button
+                            type="submit"
+                            className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 disabled:bg-indigo-300 dark:disabled:bg-indigo-800 dark:disabled:text-gray-400 transition-colors"
+                            disabled={isCorrect !== null || !answer}
+                        >
+                            Check
+                        </button>
+                    </div>
+                    <div className="flex justify-center gap-2 mt-2">
+                        {accentedChars.map((char) => (
+                            <button
+                                key={char}
+                                type="button"
+                                onClick={() => handleCharacterClick(char)}
+                                className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-md text-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600"
+                                disabled={isCorrect !== null}
+                            >
+                                {char}
+                            </button>
+                        ))}
+                    </div>
                 </form>
                 <div className="mt-6 text-center min-h-[72px]">
                     {isCorrect === true && (
@@ -213,3 +238,4 @@ function Index() {
         </div>
     );
 }
+
