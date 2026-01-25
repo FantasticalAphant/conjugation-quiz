@@ -1,0 +1,28 @@
+.timer-bar-wrapper {
+    width: 100%;
+    background-color: #e5e7eb; /* bg-gray-200 */
+    border-radius: 9999px;
+    height: 0.625rem; /* h-2.5 */
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.dark .timer-bar-wrapper {
+    background-color: #4b5563; /* dark:bg-gray-600 */
+}
+
+.timer-bar {
+    background-color: #2563eb; /* bg-blue-600 */
+    height: 0.625rem; /* h-2.5 */
+    border-radius: 9999px;
+    transform-origin: left;
+    animation: countdown var(--timer-duration, 10s) linear forwards;
+}
+
+@keyframes countdown {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}

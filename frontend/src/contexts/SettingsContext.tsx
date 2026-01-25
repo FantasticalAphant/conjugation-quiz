@@ -1,9 +1,9 @@
 import {
     createContext,
+    type PropsWithChildren,
     useContext,
     useEffect,
     useState,
-    type PropsWithChildren,
 } from "react";
 
 interface SettingsContextType {
@@ -11,6 +11,10 @@ interface SettingsContextType {
     setIncludeVosotros: (include: boolean) => void;
     selectedTenses: string[];
     setSelectedTenses: (tenses: string[]) => void;
+    isTimerEnabled: boolean;
+    setIsTimerEnabled: (enabled: boolean) => void;
+    timerDuration: number;
+    setTimerDuration: (duration: number) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -25,6 +29,14 @@ export function SettingsProvider({ children }: PropsWithChildren) {
     const [selectedTenses, setSelectedTenses] = useState<string[]>(() => {
         const stored = localStorage.getItem("selectedTenses");
         return stored ? JSON.parse(stored) : [];
+    });
+    const [isTimerEnabled, setIsTimerEnabled] = useState(() => {
+        const stored = localStorage.getItem("isTimerEnabled");
+        return stored ? JSON.parse(stored) : true;
+    });
+    const [timerDuration, setTimerDuration] = useState(() => {
+        const stored = localStorage.getItem("timerDuration");
+        return stored ? JSON.parse(stored) : 10;
     });
 
     useEffect(() => {
@@ -42,6 +54,16 @@ export function SettingsProvider({ children }: PropsWithChildren) {
         window.dispatchEvent(new Event("storage"));
     }, [selectedTenses]);
 
+    useEffect(() => {
+        localStorage.setItem("isTimerEnabled", JSON.stringify(isTimerEnabled));
+        window.dispatchEvent(new Event("storage"));
+    }, [isTimerEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem("timerDuration", JSON.stringify(timerDuration));
+        window.dispatchEvent(new Event("storage"));
+    }, [timerDuration]);
+
     return (
         <SettingsContext.Provider
             value={{
@@ -49,6 +71,10 @@ export function SettingsProvider({ children }: PropsWithChildren) {
                 setIncludeVosotros,
                 selectedTenses,
                 setSelectedTenses,
+                isTimerEnabled,
+                setIsTimerEnabled,
+                timerDuration,
+                setTimerDuration,
             }}
         >
             {children}

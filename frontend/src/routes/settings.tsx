@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react"; // Import useMemo
+import { useEffect, useMemo } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 
 export const Route = createFileRoute("/settings")({
@@ -22,6 +22,10 @@ function Settings() {
         setIncludeVosotros,
         selectedTenses,
         setSelectedTenses,
+        isTimerEnabled,
+        setIsTimerEnabled,
+        timerDuration,
+        setTimerDuration,
     } = useSettings();
 
     const { data: tenses, isLoading } = useQuery<string[]>({
@@ -99,10 +103,63 @@ function Settings() {
                                         setIncludeVosotros(e.target.checked)
                                     }
                                 />
-                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                             </div>
                         </label>
                     </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-lg font-semibold">
+                                Enable Timer
+                            </h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Add a countdown timer for each question.
+                            </p>
+                        </div>
+                        <label
+                            htmlFor="timer-toggle"
+                            className="flex cursor-pointer items-center"
+                        >
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    id="timer-toggle"
+                                    className="sr-only peer"
+                                    checked={isTimerEnabled}
+                                    onChange={(e) =>
+                                        setIsTimerEnabled(e.target.checked)
+                                    }
+                                />
+                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </div>
+                        </label>
+                    </div>
+                    {isTimerEnabled && (
+                        <div>
+                            <label
+                                htmlFor="timer-duration"
+                                className="text-lg font-semibold"
+                            >
+                                Timer Duration (seconds)
+                            </label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                Set how many seconds are given for each
+                                question.
+                            </p>
+                            <input
+                                type="number"
+                                id="timer-duration"
+                                value={timerDuration}
+                                onChange={(e) =>
+                                    setTimerDuration(Number(e.target.value))
+                                }
+                                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                                min="1"
+                            />
+                        </div>
+                    )}
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                     <h2 className="text-lg font-semibold mb-4">
@@ -169,4 +226,3 @@ function Settings() {
         </div>
     );
 }
-
