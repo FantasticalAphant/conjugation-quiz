@@ -186,7 +186,7 @@ const MainContent: React.FC<MainContentProps> = ({
     );
 };
 
-function Index() {
+export function Index() {
     const [answer, setAnswer] = useState("");
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [quizId, setQuizId] = useState(0);
