@@ -1,3 +1,0 @@
-fastapi[standard]
-uvicorn
-my-personal-spanish-conjugation-generator>=0.1.1
